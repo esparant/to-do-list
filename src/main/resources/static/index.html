@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>WELCOME</title>
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="d-flex align-items-center justify-content-center vh-100 text-center">
+<div>
+    <h1 class="display-1 fw-bold text-secondary">TO DO LIST</h1>
+    <button id="enterBtn" class="btn btn-outline-secondary mt-3">입장</button>
+</div>
+
+<script src="/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    var enterBtn = document.getElementById('enterBtn');
+
+    enterBtn.addEventListener('click', function () {
+        // '/todolist' 경로로 이동
+        window.location.href = '/todolist';
+    });
+</script>
+
+</body>
+</html>

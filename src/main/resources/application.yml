@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: todolist
+  datasource:
+    url: jdbc:h2:tcp://localhost/~/h2/db/todolist
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create

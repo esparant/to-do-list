@@ -1,0 +1,96 @@
+.form-label {
+    font-size: 1.5em;
+}
+
+.error {
+    color: red;
+}
+
+
+.todo-box {
+    border: 1px solid #ced4da;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+
+    justify-content: space-between;
+    align-items: flex-start;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.todo-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.todo-info {
+    flex-grow: 1;
+}
+
+.todo-item .todo-id {
+    font-weight: bold;
+    color: #007bff;
+}
+
+.todo-item .todo-title {
+    font-size: 1.25em;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.todo-item .todo-description {
+    font-size: 1em;
+    color: #555;
+    margin-bottom: 1rem; /* 설명 아래에 공백 추가 */
+}
+
+.todo-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    margin-left: auto; /* 오른쪽으로 이동 */
+}
+
+.edit-buttons {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem; /* 설명 아래에 공백 추가 */
+}
+
+.hidden {
+    display: none;
+}
+
+
+.status {
+    margin-left: 10px;
+    font-weight: bold;
+}
+
+.status.cont {
+    color: green;
+}
+
+.status.end {
+    color: blue;
+}
+
+.error-message {
+    color: red;
+}
+
+.todo-item.completed .todo-title,
+.todo-item.completed .todo-description {
+    color: gray;
+    text-decoration: line-through;
+}
+
+.form-group + .form-group {
+    margin-top: 15px;
+}

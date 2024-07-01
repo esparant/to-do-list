@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>할 일 목록</title>
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/styles.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-5">
+    <h1 class="text-center">TO DO LIST</h1>
+    <div class="todo-box">
+        <form th:action="@{/todolist}" th:object="${todo}" method="post">
+            <div class="form-group">
+                <label for="title" class="form-label">제목</label>
+                <input type="text" class="form-control" id="title" th:field="*{title}" placeholder="제목을 입력하세요">
+                <div class="error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>
+            </div>
+            <div class="form-group">
+                <label for="description" class="form-label">설명</label>
+                <textarea class="form-control" id="description" th:field="*{description}" rows="3" placeholder="설명을 입력하세요"></textarea>
+            </div>
+            <div class="form-group text-right mt-3">
+                <button type="submit" class="btn btn-primary">저장</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="mt-5">
+        <h2 class="text-center">저장된 할 일 목록</h2>
+        <div id="todo-list" th:each="todo : ${todos}" class="todo-item" th:data-id="${todo.id}" th:classappend="${todo.status.name() == 'END'} ? 'completed'">
+            <div class="view-mode todo-info">
+                <div>
+                    <div class="todo-id">ID: <span th:text="${todo.id}"></span></div>
+                    <div class="todo-title">
+                        <span th:text="${todo.title}">제목</span>
+                        <span class="status" th:classappend="${todo.status.name().toLowerCase()}" th:text="${todo.status.status}"></span>
+                    </div>
+                    <div class="todo-description" th:text="${todo.description}">설명</div>
+                </div>
+                <div class="todo-actions">
+                    <button type="button" class="btn btn-warning btn-edit">수정</button>
+                    <button type="button" class="btn btn-danger btn-delete">삭제</button>
+                    <button type="button" class="btn btn-success btn-complete" th:if="${todo.status.name() != 'END'}">완료</button>
+                </div>
+            </div>
+            <div class="edit-mode hidden todo-info">
+                <form class="edit-form" th:action="@{/todolist/update}" method="post">
+                    <input type="hidden" class="edit-id" name="id">
+                    <div class="form-group">
+                        <label>제목</label>
+                        <input type="text" class="form-control edit-title" name="title">
+                        <div class="error-message edit-title-error"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>설명</label>
+                        <textarea class="form-control edit-description" name="description" rows="3"></textarea>
+                        <div class="error-message edit-description-error"></div>
+                    </div>
+                    <div class="edit-buttons">
+                        <button type="submit" class="btn btn-primary">저장</button>
+                        <button type="button" class="btn btn-secondary btn-cancel">취소</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Validation Errors -->
+    <div th:if="${updateErrors}" class="mt-5">
+        <h2 class="text-center text-danger">업데이트 오류</h2>
+        <ul>
+            <li th:each="error : ${updateErrors}" th:text="${error.defaultMessage}"></li>
+        </ul>
+    </div>
+</div>
+
+<script src="/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.btn-edit').forEach(button => {
+            button.addEventListener('click', function () {
+                const item = button.closest('.todo-item');
+                const todoId = item.getAttribute('data-id');
+                fetch(`/todolist/${todoId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        item.querySelector('.edit-id').value = data.id;
+                        item.querySelector('.edit-title').value = data.title;
+                        item.querySelector('.edit-description').value = data.description;
+                        item.querySelectorAll('.view-mode').forEach(el => el.classList.add('hidden'));
+                        item.querySelectorAll('.edit-mode').forEach(el => el.classList.remove('hidden'));
+                    })
+                    .catch(error => console.error('Error:', error));
+            });
+        });
+
+        document.querySelectorAll('.btn-cancel').forEach(button => {
+            button.addEventListener('click', function () {
+                const item = button.closest('.todo-item');
+                item.querySelectorAll('.edit-mode').forEach(el => el.classList.add('hidden'));
+                item.querySelectorAll('.view-mode').forEach(el => el.classList.remove('hidden'));
+            });
+        });
+
+        document.querySelectorAll('.edit-form').forEach(form => {
+            form.addEventListener('submit', function (event) {
+                event.preventDefault();
+                const item = form.closest('.todo-item');
+                const data = {
+                    id: form.querySelector('.edit-id').value,
+                    title: form.querySelector('.edit-title').value,
+                    description: form.querySelector('.edit-description').value
+                };
+
+                console.log('Submitting form with data:', data);
+
+                // Clear previous error messages
+                item.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+
+                fetch(`/todolist/update`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            return response.json();
+                        }
+                        return response.json().then(err => { throw err; });
+                    })
+                    .then(updatedTodo => {
+                        console.log('Update successful:', updatedTodo);
+
+                        // 업데이트된 정보를 화면에 반영
+                        const todoTitleElement = item.querySelector('.todo-title');
+                        const todoDescriptionElement = item.querySelector('.todo-description');
+                        const statusElement = item.querySelector('.status');
+
+                        if (todoTitleElement) todoTitleElement.textContent = updatedTodo.title;
+                        if (todoDescriptionElement) todoDescriptionElement.textContent = updatedTodo.description;
+
+                        // 완료 상태일 경우 클래스와 텍스트 변경
+                        if (updatedTodo.status === 'END') {
+                            item.classList.add('completed');
+                            if (statusElement) {
+                                statusElement.textContent = updatedTodo.status.status; // Enum에서 상태를 가져옴
+                                statusElement.classList.remove('cont');
+                                statusElement.classList.add('end');
+                            }
+                            const completeButton = item.querySelector('.btn-complete');
+                            if (completeButton) completeButton.remove();
+                        } else {
+                            // 진행 중 상태일 경우 클래스와 텍스트를 유지
+                            item.classList.remove('completed');
+                            if (statusElement) {
+                                statusElement.textContent = updatedTodo.status.status; // Enum에서 상태를 가져옴
+                                statusElement.classList.remove('end');
+                                statusElement.classList.add('cont');
+                            }
+                        }
+
+                        // 편집 모드에서 보기 모드로 전환
+                        item.querySelectorAll('.edit-mode').forEach(el => el.classList.add('hidden'));
+                        item.querySelectorAll('.view-mode').forEach(el => el.classList.remove('hidden'));
+                    })
+                    .catch(error => {
+                        console.error('Error during update:', error);
+                        if (Array.isArray(error)) {
+                            error.forEach(err => {
+                                const field = err.field;
+                                const message = err.defaultMessage;
+                                const errorElement = item.querySelector(`.edit-${field}-error`);
+                                if (errorElement) {
+                                    errorElement.textContent = message;
+                                }
+                            });
+                        } else {
+                            console.error('Unexpected error format:', error);
+                        }
+                    });
+            });
+        });
+
+        document.querySelectorAll('.btn-delete').forEach(button => {
+            button.addEventListener('click', function () {
+                const item = button.closest('.todo-item');
+                const todoId = item.getAttribute('data-id');
+
+                fetch(`/todolist/delete/${todoId}`, {
+                    method: 'DELETE',
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            item.remove();
+                        } else {
+                            throw new Error('Failed to delete');
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+            });
+        });
+
+        document.querySelectorAll('.btn-complete').forEach(button => {
+            button.addEventListener('click', function () {
+                const item = button.closest('.todo-item');
+                const todoId = item.getAttribute('data-id');
+
+                fetch(`/todolist/complete/${todoId}`, {
+                    method: 'POST',
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            item.classList.add('completed');
+                            const statusElement = item.querySelector('.status');
+                            if (statusElement) {
+                                statusElement.textContent = '완료';
+                                statusElement.classList.remove('cont');
+                                statusElement.classList.add('end');
+                            }
+                            button.remove(); // 완료 버튼 제거
+                        } else {
+                            throw new Error('Failed to complete');
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+            });
+        });
+    });
+</script>
+</body>
+</html>
