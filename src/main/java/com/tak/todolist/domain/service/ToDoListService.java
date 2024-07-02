@@ -38,7 +38,7 @@ public class ToDoListService {
     }
 
     @Transactional
-    public void completeToDo(Long id) {
-        repository.complete(id);
+    public ToDoList completeToDo(Long id) {
+        return repository.complete(id);
     }
 }

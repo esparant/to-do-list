@@ -214,16 +214,22 @@
                 })
                     .then(response => {
                         if (response.ok) {
+                            return response.json(); // 응답 본문을 JSON으로 변환
+                        } else {
+                            throw new Error('Failed to complete');
+                        }
+                    })
+                    .then(data => {
+                        console.log(data)
+                        const status = data.status; // JSON 객체에서 status 값을 추출
+                        if (status.status === '완료') {
                             item.classList.add('completed');
                             const statusElement = item.querySelector('.status');
                             if (statusElement) {
-                                statusElement.textContent = '완료';
-                                statusElement.classList.remove('cont');
+                                statusElement.textContent = status.status;
                                 statusElement.classList.add('end');
                             }
                             button.remove(); // 완료 버튼 제거
-                        } else {
-                            throw new Error('Failed to complete');
                         }
                     })
                     .catch(error => console.error('Error:', error));

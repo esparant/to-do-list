@@ -35,8 +35,8 @@ public class ToDoListRepository {
         em.remove(toDoList);
     }
 
-    public void complete(Long id) {
+    public ToDoList complete(Long id) {
         ToDoList toDoList = em.find(ToDoList.class, id);
-        toDoList.changeStatus(toDoList.getStatus());
+        return toDoList.changeStatus(toDoList.getStatus());
     }
 }

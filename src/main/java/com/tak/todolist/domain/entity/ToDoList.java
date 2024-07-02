@@ -1,5 +1,7 @@
 package com.tak.todolist.domain.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.tak.todolist.domain.entity.dto.ToDoListDto;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -45,10 +47,12 @@ public class ToDoList {
         return this;
     }
 
-    public void changeStatus(ToDoListStatus status) {
+    public ToDoList changeStatus(ToDoListStatus status) {
         this.status = ToDoListStatus.END;
+        return this;
     }
 
+    @JsonFormat(shape = Shape.OBJECT)
     public enum ToDoListStatus {
         CONT("진행중"), END("완료");
 

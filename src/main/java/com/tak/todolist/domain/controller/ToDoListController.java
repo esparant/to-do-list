@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequiredArgsConstructor
@@ -52,16 +51,15 @@ public class ToDoListController {
         return "redirect:/todolist";
     }
 
-    @ResponseBody
     @GetMapping("/todolist/{id}")
-    public ToDoListDto getToDoList(@PathVariable("id") Long id) {
+    public ResponseEntity<ToDoListDto> getToDoList(@PathVariable("id") Long id) {
 
         ToDoList todo = service.findById(id);
 
-        return new ToDoListDto(todo);
+        return new ResponseEntity<>(new ToDoListDto(todo), HttpStatus.OK);
     }
+
     @PostMapping("/todolist/update")
-    @ResponseBody
     public ResponseEntity<?> update(@Valid @RequestBody ToDoListDto update, BindingResult bindingResult) {
         log.info("Received update request: {}", update);
 
@@ -75,25 +73,18 @@ public class ToDoListController {
     }
 
     @DeleteMapping("/todolist/delete/{id}")
-    @ResponseBody
     public HttpStatus delete(@PathVariable("id") Long id) {
         service.deleteToDoList(id);
         return HttpStatus.OK;
     }
 
     @PostMapping("/todolist/complete/{id}")
-    @ResponseBody
-    public HttpStatus completeTodo(@PathVariable("id") Long id) {
-
-        service.completeToDo(id);
-
-        return HttpStatus.OK;
+    public ResponseEntity<ToDoListDto> completeTodo(@PathVariable("id") Long id) {
+        return new ResponseEntity<>(new ToDoListDto(service.completeToDo(id)), HttpStatus.OK);
     }
 
     private List<ToDoListDto> getToDoListDtos() {
-        return service.findAllToDoLists().stream()
-                .map(ToDoListDto::new)
-                .toList();
+        return service.findAllToDoLists().stream().map(ToDoListDto::new).toList();
     }
 }
 
